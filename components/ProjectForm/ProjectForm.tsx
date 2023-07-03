@@ -5,6 +5,7 @@ import FormField from "../FormField/FormField";
 import { categoryFilters } from "@/constants";
 import CustomMenu from "../CustomMenu/CustomMenu";
 import { useState } from "react";
+import Button from "../Button/Button";
 
 interface Props {
   type: "create" | "edit";
@@ -23,7 +24,20 @@ const ProjectForm = ({ type, session }: Props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    alert("Image changed");
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      const result = reader.result as string;
+      handleStateChange("image", result);
+    };
   };
   const handleStateChange = (fildName: string, value: string) => {
     setForm((prevState) => ({ ...prevState, [fildName]: value }));
@@ -94,7 +108,16 @@ const ProjectForm = ({ type, session }: Props) => {
         setState={(value) => handleStateChange("category", value)}
       />
       <div className="flexStart w-full">
-        <button>Create</button>
+        <Button
+          type="submit"
+          title={
+            isSubmitting
+              ? `${type === "create" ? "Creating" : "Editing"}`
+              : `${type === "create" ? "Create" : "Edit"}`
+          }
+          leftIcon={isSubmitting ? "" : "/plus.svg"}
+          isSubmitting={isSubmitting}
+        />
       </div>
     </form>
   );
