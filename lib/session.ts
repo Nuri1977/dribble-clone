@@ -4,7 +4,8 @@ import { AdapterUser } from "next-auth/adapters";
 import GoogleProvider from "next-auth/providers/google";
 import jsonwebtoken from "jsonwebtoken";
 import { JWT } from "next-auth/jwt";
-import { SessionInterface } from "@/common.types";
+import { SessionInterface, UserProfile } from "@/common.types";
+import { createUser, getUser } from "./actions";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -37,19 +38,44 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async session({ session }) {
-      console.log({ session });
-      return session;
-    },
-    async signIn({ user }) {
+      const email = session?.user?.email as string;
+
       try {
-        //get user from db
+        const data = await getUser(email) as { user?: UserProfile };
 
-        //if user not found, create user in db
+        const newSession = {
+          ...session,
+          user: {
+            ...session.user,
+            ...data?.user,
+          },
+        };
 
-        //return true to continue signin
+        return newSession;
+      } catch (error: any) {
+        console.error("Error retrieving user data: ", error.message);
+        return session;
+      }
+    },
+    async signIn({ user }: { user: AdapterUser | User }) {
+      try {
+        const userExists = await getUser(user?.email as string) as {
+          user?: UserProfile;
+        };
+
+        console.log("User exists: ", userExists);
+
+        if (!userExists.user) {
+          await createUser(
+            user.name as string,
+            user.email as string,
+            user.image as string
+          );
+        }
+
         return true;
-      } catch (error) {
-        console.error(error);
+      } catch (error: any) {
+        console.log("Error checking if user exists: ", error.message);
         return false;
       }
     },
@@ -57,7 +83,13 @@ export const authOptions: NextAuthOptions = {
 };
 
 export async function getCurrentUser() {
-  const session = (await getServerSession()) as SessionInterface;
+  const session = await getServerSession() as SessionInterface;
+  const userdb= await getUser(session?.user?.email as string) as { user?: UserProfile };
+
+  session.user = {
+    ...session.user,
+    ...userdb?.user,
+  };
 
   return session;
 }
