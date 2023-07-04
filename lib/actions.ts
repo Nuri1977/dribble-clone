@@ -1,4 +1,9 @@
-import { createUserMutation, getUserQuery } from "@/graphql";
+import { ProjectForm } from "@/common.types";
+import {
+  createNewProjectMutation,
+  createUserMutation,
+  getUserQuery,
+} from "@/graphql";
 import { GraphQLClient } from "graphql-request";
 
 const isProduction = process.env.NODE_ENV === "production";
@@ -26,6 +31,9 @@ const makeGraphQLRequest = async (query: string, variables = {}) => {
 export const getUser = (email: string) => {
   client.setHeader("x-api-key", apiKey);
   console.log("email", email);
+  if (!email) {
+    return null;
+  }
   return makeGraphQLRequest(getUserQuery, { email });
 };
 
@@ -40,4 +48,49 @@ export const createUser = (name: string, email: string, avatarUrl: string) => {
   };
 
   return makeGraphQLRequest(createUserMutation, variables);
+};
+
+export const fetchToken = async () => {
+  try {
+    const response = await fetch(`${serverUrl}/api/auth/token`);
+    return response.json();
+  } catch (error) {
+    throw error;
+  }
+};
+
+const uploadImage = async (imagePath: string) => {
+  try {
+    const response = await fetch(`${serverUrl}/api/upload`, {
+      method: "POST",
+      body: JSON.stringify({ path: imagePath }),
+    });
+    return response.json();
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const createNewProject = async (
+  form: ProjectForm,
+  creatorId: string,
+  token: string
+) => {
+  const resCloudinary = await uploadImage(form.image);
+
+  if (resCloudinary.url) {
+    client.setHeader("Authorization", `Bearer ${token}`);
+    client.setHeader("x-api-key", apiKey);
+    const variables = {
+      input: {
+        ...form,
+        image: resCloudinary.url,
+        createdBy: {
+          link: creatorId,
+        },
+      },
+    };
+
+    return makeGraphQLRequest(createNewProjectMutation, variables);
+  }
 };

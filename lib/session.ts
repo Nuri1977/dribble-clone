@@ -1,11 +1,12 @@
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import { NextAuthOptions, User } from "next-auth";
 import { AdapterUser } from "next-auth/adapters";
 import GoogleProvider from "next-auth/providers/google";
 import jsonwebtoken from "jsonwebtoken";
 import { JWT } from "next-auth/jwt";
-import { SessionInterface, UserProfile } from "@/common.types";
+
 import { createUser, getUser } from "./actions";
+import { SessionInterface, UserProfile } from "@/common.types";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -34,14 +35,14 @@ export const authOptions: NextAuthOptions = {
   // },
   theme: {
     colorScheme: "light",
-    logo: "/logo.png",
+    logo: "/logo.svg",
   },
   callbacks: {
     async session({ session }) {
       const email = session?.user?.email as string;
 
       try {
-        const data = await getUser(email) as { user?: UserProfile };
+        const data = (await getUser(email)) as { user?: UserProfile };
 
         const newSession = {
           ...session,
@@ -59,11 +60,9 @@ export const authOptions: NextAuthOptions = {
     },
     async signIn({ user }: { user: AdapterUser | User }) {
       try {
-        const userExists = await getUser(user?.email as string) as {
+        const userExists = (await getUser(user?.email as string)) as {
           user?: UserProfile;
         };
-
-        console.log("User exists: ", userExists);
 
         if (!userExists.user) {
           await createUser(
@@ -83,8 +82,12 @@ export const authOptions: NextAuthOptions = {
 };
 
 export async function getCurrentUser() {
-  const session = await getServerSession() as SessionInterface;
-  const userdb= await getUser(session?.user?.email as string) as { user?: UserProfile };
+  const session = (await getServerSession()) as SessionInterface;
+  const userdb = (await getUser(session?.user?.email as string)) as {
+    user?: UserProfile;
+  };
+
+  if (!userdb?.user) return session;
 
   session.user = {
     ...session.user,
