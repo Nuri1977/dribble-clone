@@ -1,11 +1,13 @@
 "use client";
-import { SessionInterface } from "@/common.types";
+import { ProjectForm, SessionInterface } from "@/common.types";
 import Image from "next/image";
 import FormField from "../FormField/FormField";
 import { categoryFilters } from "@/constants";
 import CustomMenu from "../CustomMenu/CustomMenu";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import Button from "../Button/Button";
+import { createNewProject, fetchToken } from "@/lib/actions";
+import { useRouter } from "next/navigation";
 
 interface Props {
   type: "create" | "edit";
@@ -13,8 +15,9 @@ interface Props {
 }
 
 const ProjectForm = ({ type, session }: Props) => {
-  const [form, setForm] = useState({
-    image: null,
+  const router = useRouter();
+  const [form, setForm] = useState<ProjectForm>({
+    image: "",
     title: "",
     description: "",
     liveSiteUrl: "",
@@ -26,12 +29,10 @@ const ProjectForm = ({ type, session }: Props) => {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
     if (!file.type.startsWith("image/")) {
       alert("Please upload an image file");
       return;
     }
-
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
@@ -39,15 +40,32 @@ const ProjectForm = ({ type, session }: Props) => {
       handleStateChange("image", result);
     };
   };
+
   const handleStateChange = (fildName: string, value: string) => {
     setForm((prevState) => ({ ...prevState, [fildName]: value }));
   };
-  const handleFormSubmit = async (event: React.FormEvent) => {
+
+  const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    alert("handleFormSubmit");
     event.preventDefault();
+    setIsSubmitting(true);
+    const { token } = await fetchToken();
+    try {
+      await createNewProject(form, session?.user?.id, token);
+      router.push("/");
+    } catch (error) {
+      alert(error);
+      console.log(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <form className="flexStart form" onSubmit={handleFormSubmit}>
+    <form
+      className="flexStart form"
+      onSubmit={(event) => handleFormSubmit(event)}
+    >
       <div className="flexStart form_image-container">
         <label
           htmlFor="poster"
@@ -109,14 +127,14 @@ const ProjectForm = ({ type, session }: Props) => {
       />
       <div className="flexStart w-full">
         <Button
-          type="submit"
           title={
             isSubmitting
               ? `${type === "create" ? "Creating" : "Editing"}`
               : `${type === "create" ? "Create" : "Edit"}`
           }
+          type="submit"
           leftIcon={isSubmitting ? "" : "/plus.svg"}
-          isSubmitting={isSubmitting}
+          submitting={isSubmitting}
         />
       </div>
     </form>
