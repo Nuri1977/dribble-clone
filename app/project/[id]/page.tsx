@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-
 import { getCurrentUser } from "@/lib/session";
 import { getProjectDetails } from "@/lib/actions";
 import { ProjectInterface } from "@/common.types";
