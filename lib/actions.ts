@@ -2,7 +2,12 @@ import { ProjectForm } from "@/common.types";
 import {
   createNewProjectMutation,
   createUserMutation,
+  deleteProjectMutation,
+  getProjectByIdQuery,
+  getProjectsOfUserQuery,
   getUserQuery,
+  projectsQuery,
+  updateProjectMutation,
 } from "@/graphql";
 import { GraphQLClient } from "graphql-request";
 
@@ -20,6 +25,7 @@ const serverUrl = isProduction
 const client = new GraphQLClient(apiUrl);
 
 const makeGraphQLRequest = async (query: string, variables = {}) => {
+  client.setHeader("x-api-key", apiKey);
   try {
     //client request
     return await client.request(query, variables);
@@ -29,7 +35,6 @@ const makeGraphQLRequest = async (query: string, variables = {}) => {
 };
 
 export const getUser = (email: string) => {
-  client.setHeader("x-api-key", apiKey);
   console.log("email", email);
   if (!email) {
     return null;
@@ -38,7 +43,6 @@ export const getUser = (email: string) => {
 };
 
 export const createUser = (name: string, email: string, avatarUrl: string) => {
-  client.setHeader("x-api-key", apiKey);
   const variables = {
     input: {
       name,
@@ -80,7 +84,7 @@ export const createNewProject = async (
 
   if (resCloudinary.url) {
     client.setHeader("Authorization", `Bearer ${token}`);
-    client.setHeader("x-api-key", apiKey);
+
     const variables = {
       input: {
         ...form,
@@ -93,4 +97,57 @@ export const createNewProject = async (
 
     return makeGraphQLRequest(createNewProjectMutation, variables);
   }
+};
+
+export const fetchAllProjects = async (
+  category?: string,
+  endcursor?: string
+) => {
+  return makeGraphQLRequest(projectsQuery, { category, endcursor });
+};
+
+export const getProjectDetails = async (id: string) => {
+  return makeGraphQLRequest(getProjectByIdQuery, { id });
+};
+
+export const getUserProjects = async (id: string, last?: number) => {
+  return makeGraphQLRequest(getProjectsOfUserQuery, { id, last });
+};
+
+export const deleteProject = async (id: string, token: string) => {
+  client.setHeader("Authorization", `Bearer ${token}`);
+
+  return makeGraphQLRequest(deleteProjectMutation, { id });
+};
+
+export const updateProject = async (
+  form: ProjectForm,
+  projectId: string,
+  token: string
+) => {
+  function isBase64DataURL(value: string) {
+    const base64Regex = /^data:image\/[a-z]+;base64,/;
+    return base64Regex.test(value);
+  }
+
+  let updatedForm = { ...form };
+
+  const isUploadingNewImage = isBase64DataURL(form.image);
+
+  if (isUploadingNewImage) {
+    const imageUrl = await uploadImage(form.image);
+
+    if (imageUrl.url) {
+      updatedForm = { ...updatedForm, image: imageUrl.url };
+    }
+  }
+
+  client.setHeader("Authorization", `Bearer ${token}`);
+
+  const variables = {
+    id: projectId,
+    input: updatedForm,
+  };
+
+  return makeGraphQLRequest(updateProjectMutation, variables);
 };

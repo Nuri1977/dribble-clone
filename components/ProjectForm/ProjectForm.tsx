@@ -1,28 +1,33 @@
 "use client";
-import { ProjectForm, SessionInterface } from "@/common.types";
+import {
+  ProjectForm,
+  ProjectInterface,
+  SessionInterface,
+} from "@/common.types";
 import Image from "next/image";
 import FormField from "../FormField/FormField";
 import { categoryFilters } from "@/constants";
 import CustomMenu from "../CustomMenu/CustomMenu";
 import { FormEvent, useState } from "react";
 import Button from "../Button/Button";
-import { createNewProject, fetchToken } from "@/lib/actions";
+import { createNewProject, fetchToken, updateProject } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 
 interface Props {
   type: "create" | "edit";
   session: SessionInterface;
+  project?: ProjectInterface;
 }
 
-const ProjectForm = ({ type, session }: Props) => {
+const ProjectForm = ({ type, session, project }: Props) => {
   const router = useRouter();
   const [form, setForm] = useState<ProjectForm>({
-    image: "",
-    title: "",
-    description: "",
-    liveSiteUrl: "",
-    githubUrl: "",
-    category: "",
+    image: project?.image || "",
+    title: project?.title || "",
+    description: project?.description || "",
+    liveSiteUrl: project?.liveSiteUrl || "",
+    githubUrl: project?.githubUrl || "",
+    category: project?.category || "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -46,13 +51,21 @@ const ProjectForm = ({ type, session }: Props) => {
   };
 
   const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    alert("handleFormSubmit");
     event.preventDefault();
     setIsSubmitting(true);
     const { token } = await fetchToken();
     try {
-      await createNewProject(form, session?.user?.id, token);
-      router.push("/");
+      if (type === "create") {
+        await createNewProject(form, session?.user?.id, token);
+
+        router.push("/");
+      }
+
+      if (type === "edit") {
+        await updateProject(form, project?.id as string, token);
+
+        router.push("/");
+      }
     } catch (error) {
       alert(error);
       console.log(error);
@@ -67,25 +80,22 @@ const ProjectForm = ({ type, session }: Props) => {
       onSubmit={(event) => handleFormSubmit(event)}
     >
       <div className="flexStart form_image-container">
-        <label
-          htmlFor="poster"
-          className="flexCenter form_image-label cursor-pointer"
-        >
-          {!form.image && "Chose a poster for your project"}
+        <label htmlFor="poster" className="flexCenter form_image-label">
+          {!form.image && "Choose a poster for your project"}
         </label>
         <input
+          id="image"
           type="file"
-          id="poster"
           accept="image/*"
-          required={type === "create"}
-          onChange={handleImageChange}
-          className="hidden cursor-pointer"
+          required={type === "create" ? true : false}
+          className="form_image-input"
+          onChange={(e) => handleImageChange(e)}
         />
         {form.image && (
           <Image
             src={form?.image}
             className="sm:p-10 object-contain z-20"
-            alt="ProjectPoster"
+            alt="image"
             fill
           />
         )}
