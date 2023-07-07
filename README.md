@@ -1,34 +1,61 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Dribble Clone
 
-## Getting Started
+A clone of the popular design platform Dribbble, built using Next.js 13, Tailwind CSS, and Grafbase as the backend database. This project utilizes NextAuth for authentication and user management.
 
-First, run the development server:
+## General info
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+The Dribbble Clone project aims to replicate the core features and functionalities of Dribbble, providing a platform for designers to showcase their work, discover creative inspiration, and connect with other designers. It serves as a playground for designers to share their design shots, receive feedback, and engage with the design community.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Live preview
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+[link](https://dribble-clone-rose.vercel.app)
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Screenshots
 
-## Learn More
+![Example screenshot](public/dribble-main.png)
 
-To learn more about Next.js, take a look at the following resources:
+## Technologies
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Project is created with:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+- React
+- NextJS
+- Typescript
+- TailwindCSS
+- Grafbase
 
-## Deploy on Vercel
+## Setup
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+To set up the Drible Clone project locally, follow these steps:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Clone the repository: git clone https://github.com/Nuri1977/dribble-clone.git
+- Install dependencies: cd leetcode-clone then npm install
+- Set up Garafbase project and obtain necessary credentials, install ittt localy.
+- Start the development server: npm run dev
+- Access the project at http://localhost:3000.
+
+## Author
+
+👤 **Nuri Lacka**
+
+- GitHub: [@Nuri1977](https://github.com/Nuri1977)
+- Twitter: [@Lackanuri](https://twitter.com/LackaNuri)
+- LinkedIn: [@nurilacka](https://www.linkedin.com/in/nuri-lacka-7141b01ba/)
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!
+
+Feel free to check the [issues page]().
+
+## Show your support
+
+Give a ⭐️ if you like this project!
+
+## Acknowledgments
+
+- A special thanks to [Adrian Hajdin](https://github.com/adrianhajdin/project_nextjs13_flexibble) and his youtube chaannel [Javascript Mastery](https://www.youtube.com/watch?v=986hztrfaSQ&list=PL_HQtCvFI4x2RkIUuH_M5LJ091pWzXoSP&index=19).
+
+## 📝 License
+
+This project is [MIT](LICENSE) licensed.
