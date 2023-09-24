@@ -21,7 +21,7 @@ const ProjectCard = ({
   userId,
 }: Props) => {
   return (
-    <div className="flexCenter flex-col justify-between rounded-2xl h-[300px] overflow-hidden drop-shadow-lg">
+    <div className="flexCenter flex-col justify-between rounded-2xl h-[250px] overflow-hidden drop-shadow-lg">
       <Link
         href={`/project/${id}`}
         className="flex-1 flexCenter group relative overflow-hidden rounded-2xl"
