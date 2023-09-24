@@ -21,17 +21,17 @@ const ProjectCard = ({
   userId,
 }: Props) => {
   return (
-    <div className="flexCenter flex-col rounded-2xl drop-shadow-card">
+    <div className="flexCenter flex-col justify-between rounded-2xl h-[300px] overflow-hidden drop-shadow-lg">
       <Link
         href={`/project/${id}`}
-        className="flexCenter group relative w-full h-full"
+        className="flex-1 flexCenter group relative overflow-hidden rounded-2xl"
       >
         <Image
           src={image}
           alt={"Project Image"}
-          width={414}
-          height={314}
-          className="w-full h-full object-cover rounded-2xl"
+          width={1500}
+          height={3000}
+          className="min-h-full min-w-full object-cover rounded-2xl"
         />
         <div className="hidden group-hover:flex profile_card-title">
           <p className="w-full">{title}</p>
